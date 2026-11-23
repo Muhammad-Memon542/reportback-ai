@@ -1,0 +1,30 @@
+# Local hooks only: they run the same pinned tool versions as CI via uv.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy (strict on reportback/)
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: no-raw-data
+        name: data/raw/ must not be committed
+        entry: data/raw/ is a local cache; do not commit it
+        language: fail
+        files: ^data/raw/
+      - id: no-env-file
+        name: .env must not be committed
+        entry: .env holds secrets; do not commit it
+        language: fail
+        files: (^|/)\.env$

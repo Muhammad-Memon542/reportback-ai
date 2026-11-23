@@ -1,0 +1,56 @@
+{
+ "help": "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action/help_show?name=package_search",
+ "success": true,
+ "result": {
+  "count": 1,
+  "results": [
+   {
+    "id": "de0bd325-626d-4808-aecf-69e1cdd169fc",
+    "name": "report-request-log-city-council-and-its-committees",
+    "title": "Report Request Log – City Council and its Committees",
+    "license_title": "open-government-licence-toronto",
+    "owner_division": "City Clerk's Office",
+    "refresh_rate": "As available",
+    "last_refreshed": "2026-11-13 13:52:59",
+    "resources": [
+     {
+      "id": "792f1378-cdb7-49b6-b540-59c8f4337ac0",
+      "name": "Report Request Log 2022-2026",
+      "format": "XLSX",
+      "url": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/de0bd325-626d-4808-aecf-69e1cdd169fc/resource/792f1378-cdb7-49b6-b540-59c8f4337ac0/download/reportrequestlog2022-2026.xlsx",
+      "datastore_active": false,
+      "last_modified": "2026-11-13T13:52:59",
+      "size": 688326
+     },
+     {
+      "id": "af867fd7-cf26-4403-bc92-86b4e1d12ee0",
+      "name": "Report Request Log 2022-2026 PDF",
+      "format": "PDF",
+      "url": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/de0bd325-626d-4808-aecf-69e1cdd169fc/resource/af867fd7-cf26-4403-bc92-86b4e1d12ee0/download/reportrequestlog2022-2026.pdf",
+      "datastore_active": false,
+      "last_modified": "2026-11-13T13:52:18",
+      "size": 1943294
+     },
+     {
+      "id": "d00df34c-5cbd-40df-9c7b-d177c91acc98",
+      "name": "Report Request Log 2018-2022",
+      "format": "XLSX",
+      "url": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/de0bd325-626d-4808-aecf-69e1cdd169fc/resource/d00df34c-5cbd-40df-9c7b-d177c91acc98/download/reportrequestlog2018-2022.xlsx",
+      "datastore_active": false,
+      "last_modified": "2024-01-09T17:25:07",
+      "size": 676976
+     },
+     {
+      "id": "75177565-7820-45c1-8478-cf9904ac02f4",
+      "name": "Report Request Log 2018-2022 PDF",
+      "format": "PDF",
+      "url": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/de0bd325-626d-4808-aecf-69e1cdd169fc/resource/75177565-7820-45c1-8478-cf9904ac02f4/download/reportrequestlog2018-2022.pdf",
+      "datastore_active": false,
+      "last_modified": "2024-01-09T17:30:42",
+      "size": 3586413
+     }
+    ]
+   }
+  ]
+ }
+}

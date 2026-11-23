@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Secrets / local config
+.env
+.env.*
+!.env.example
+
+# Raw source cache (CLAUDE.md: cache raw files in data/raw/, gitignored)
+data/raw/
+*.part
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store

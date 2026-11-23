@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      smoke:
+        description: "Also run live smoke tests (CKAN is free; LLM uses a few tokens)"
+        type: choice
+        options: [none, ckan, ckan+llm]
+        default: none
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest -q
+
+  # Live checks never run on PRs: they hit external services. Manual trigger only.
+  smoke:
+    needs: check
+    if: github.event_name == 'workflow_dispatch' && inputs.smoke != 'none'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Smoke CKAN (schema-drift check on the Clerk's datasets)
+        run: uv run python scripts/smoke_ckan.py
+      - name: Smoke LLM
+        if: inputs.smoke == 'ckan+llm'
+        env:
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_CHAT_MODEL: ${{ vars.LLM_CHAT_MODEL }}
+          LLM_EMBEDDING_MODEL: ${{ vars.LLM_EMBEDDING_MODEL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: uv run python scripts/smoke_llm.py
