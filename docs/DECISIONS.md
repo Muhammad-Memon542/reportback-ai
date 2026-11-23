@@ -57,6 +57,13 @@ The subscription carries the built-in "Allowed resource deployment regions" assi
 - **Postgres, Container Apps, App Insights (Phase 10) → `canadacentral`**: closest to Toronto users and data.
 - The cross-region LLM calls add ~100 ms to calls that take seconds, and their payloads are a few KB, so the inter-region transfer cost is negligible.
 
+**D12. Foundry deployments are chosen from the subscription's actual quota.** (2026-11-23)
+`az cognitiveservices usage list -l swedencentral` shows non-zero Global Standard quota (thousands of tokens/min) for `gpt-5-mini` (500), `gpt4.1-mini` (200) and `text-embedding-3-small` (1000). `gpt-5.4-mini` has **0**.
+- **Chat: `gpt-5-mini`.** It has the most headroom and is the newer model. Run with `LLM_REASONING_EFFORT=low` by default, because reasoning tokens bill as output.
+- **`gpt-4.1-mini` is also deployed.** That costs nothing idle, and Phase 3/4 needs a second model for the judge-model and LLM-rerank comparisons.
+- **Embeddings: `text-embedding-3-small`**, 1,536 dims, matching the schema.
+- **No Batch API discount for these models.** The only Global Batch quota is for `gpt-35-turbo`. Phase 3 cost estimates must assume standard pricing, so caching, prefilters and `LINK_MAX_COST_USD` carry the whole cost control.
+
 ## Open questions (need a decision before/at Phase 1)
 
 **Q2. What does "open/overdue" mean now that both term logs have been closed out?**

@@ -19,7 +19,7 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from pydantic import BaseModel
 
-from reportback.config import Settings
+from reportback.config import ReasoningEffort, Settings
 
 OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434/v1"
 
@@ -109,14 +109,22 @@ class LLMClient:
     def _chat_model(self, model: str | None) -> str:
         return model or self._require(self.settings.llm_chat_model, "LLM_CHAT_MODEL")
 
-    @staticmethod
-    def _optional(temperature: float | None, max_tokens: int | None) -> dict[str, Any]:
-        # Only send sampling params when asked: several current models reject `temperature`.
+    def _optional(
+        self,
+        temperature: float | None,
+        max_tokens: int | None,
+        reasoning_effort: ReasoningEffort | None,
+    ) -> dict[str, Any]:
+        # Only send optional params when asked or configured: several current models reject
+        # `temperature`, and non-reasoning models reject `reasoning_effort`.
         opts: dict[str, Any] = {}
         if temperature is not None:
             opts["temperature"] = temperature
         if max_tokens is not None:
             opts["max_completion_tokens"] = max_tokens
+        effort = reasoning_effort or self.settings.llm_reasoning_effort
+        if effort is not None:
+            opts["reasoning_effort"] = effort
         return opts
 
     def chat(
@@ -126,11 +134,14 @@ class LLMClient:
         model: str | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        reasoning_effort: ReasoningEffort | None = None,
     ) -> ChatResult:
         model_name = self._chat_model(model)
         t0 = time.perf_counter()
         resp = self._client.chat.completions.create(
-            model=model_name, messages=list(messages), **self._optional(temperature, max_tokens)
+            model=model_name,
+            messages=list(messages),
+            **self._optional(temperature, max_tokens, reasoning_effort),
         )
         latency = (time.perf_counter() - t0) * 1000
         if not resp.choices or resp.choices[0].message.content is None:
@@ -150,6 +161,7 @@ class LLMClient:
         model: str | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        reasoning_effort: ReasoningEffort | None = None,
     ) -> JsonResult[T]:
         """Structured output: the response must validate against `schema` (strict JSON schema)."""
         model_name = self._chat_model(model)
@@ -158,7 +170,7 @@ class LLMClient:
             model=model_name,
             messages=list(messages),
             response_format=schema,
-            **self._optional(temperature, max_tokens),
+            **self._optional(temperature, max_tokens, reasoning_effort),
         )
         latency = (time.perf_counter() - t0) * 1000
         if not resp.choices:

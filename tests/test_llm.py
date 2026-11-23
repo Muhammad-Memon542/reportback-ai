@@ -142,3 +142,15 @@ def test_ollama_needs_no_key_and_defaults_to_localhost(tmp_path: Path) -> None:
     s = make_settings(tmp_path, llm_provider="ollama", llm_chat_model="llama3.2")
     c = LLMClient(s)
     assert str(c._client.base_url).startswith("http://localhost:11434/v1")
+
+
+def test_reasoning_effort_sent_only_when_configured(tmp_path: Path) -> None:
+    rec = Recorder({"/chat/completions": completion("pong")})
+    make_client(tmp_path, rec).chat([{"role": "user", "content": "x"}])
+    assert "reasoning_effort" not in rec.requests[-1][1]
+
+    c = make_client(tmp_path, rec, llm_reasoning_effort="low")
+    c.chat([{"role": "user", "content": "x"}])
+    assert rec.requests[-1][1]["reasoning_effort"] == "low"
+    c.chat([{"role": "user", "content": "x"}], reasoning_effort="minimal")  # per-call override
+    assert rec.requests[-1][1]["reasoning_effort"] == "minimal"

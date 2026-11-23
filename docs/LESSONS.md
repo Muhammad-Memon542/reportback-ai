@@ -21,3 +21,6 @@ The first CKAN call got `403 (agent proxy: no rule or network setting allows thi
 
 **L6. Empty "Region" list when creating a Foundry resource = resource provider not registered.**
 On the Azure for Students subscription, the Foundry create form showed "No available items" for Region, even though the subscription's allowed regions include Foundry regions. Cause: `Microsoft.CognitiveServices` wasn't registered on the new subscription. Fix: `az provider register -n Microsoft.CognitiveServices --wait` (free), then reload the form. Second trap: the form then **defaulted to East US 2, which is outside the subscription's allowed regions** (DECISIONS D11). It would have failed at deploy time with `RequestDisallowedByAzure`. Always pick from the allowed list: Foundry goes in `swedencentral`.
+
+**L7. A model can appear in the catalogue but have 0 quota.**
+`gpt-5.4-mini` is listed by `GET /openai/v1/models` on our resource, but deploying it failed with `InsufficientQuota … 0 / 0 quota units`. The catalogue lists what exists, not what this subscription may deploy. Check quota first: ``az cognitiveservices usage list -l <region> --query '[?limit > `0`]' -o table``.

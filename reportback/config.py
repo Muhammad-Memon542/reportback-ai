@@ -18,10 +18,14 @@ DEFAULT_ALLOWED_HOSTS = (
 )
 
 LLMProvider = Literal["foundry", "openai", "ollama"]
+ReasoningEffort = Literal["none", "minimal", "low", "medium", "high"]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # env_ignore_empty: `LLM_REASONING_EFFORT=` (as in .env.example) means "unset", not "".
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
+    )
 
     # --- LLM layer (all calls go through reportback/llm/) ---
     llm_provider: LLMProvider = "foundry"
@@ -31,6 +35,9 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr | None = None
     llm_chat_model: str | None = None  # deployment name on Foundry
     llm_embedding_model: str | None = None  # deployment name on Foundry
+    # Reasoning models (gpt-5 family) bill hidden reasoning tokens as output. Set this for them
+    # to cap cost; leave unset for non-reasoning models (they reject the parameter).
+    llm_reasoning_effort: ReasoningEffort | None = None
     embedding_dim: int = 1536  # must match vector(N) columns in the schema
     llm_timeout_s: float = 60.0
     llm_max_retries: int = 2
