@@ -1,0 +1,208 @@
+# Canonical City divisions, offices and agencies, with the strings that map to them.
+#
+# Matching (reportback/ingest/divisions.py): case-insensitive; '&' == 'and'; punctuation and
+# dashes ignored; whole words only; longest alias wins and consumes its text, so
+# "Deputy City Manager, Corporate Services" does not also match "City Manager".
+#
+# successors: divisions that later took over this one's work (renames/splits). They are
+# added to divisions[] so a directive assigned to the old name can be matched to reports
+# from the new one.
+#
+# Sources: the Clerk's own division lookup sheet in the Report Request Log workbook, and
+# the official titles used in the "Assigned to" column (2018-2022 and 2022-2026 logs).
+
+ignore:  # consumed without producing a division (too generic to map)
+  - deputy city manager
+  - appropriate staff
+  - city divisions identified as action leads
+  - executive management
+  - applicable agencies and divisions
+  - all other relevant city divisions
+
+divisions:
+  # --- Infrastructure Services / Development and Growth Services clusters ---
+  - name: Transportation Services
+    aliases: [transportation services, general manager transportation, traffic management, transportation]
+  - name: Toronto Water
+    aliases: [toronto water]
+  - name: Solid Waste Management Services
+    aliases: [solid waste management services, solid waste management]
+  - name: Engineering and Construction Services
+    aliases: [engineering and construction services, engineering and construction, chief engineer]
+  - name: Transit Expansion Office
+    aliases: [transit expansion]
+  - name: City Planning
+    aliases: [city planning, chief planner, community planning, heritage planning]
+    successors: [Development Review]
+  - name: Development Review
+    aliases: [development review]
+  - name: Toronto Building
+    aliases: [toronto building, chief building official]
+  - name: Municipal Licensing and Standards
+    aliases: [municipal licensing and standards, municipal licensing and standard]  # second: typo in the log
+  - name: Corporate Real Estate Management
+    aliases: [corporate real estate management, corporate real estate managemen, real estate services, facilities management]
+  - name: Housing Secretariat
+    aliases: [housing secretariat, housing secretariate]
+  - name: Affordable Housing Office
+    aliases: [affordable housing office]
+    successors: [Housing Secretariat]
+  - name: Housing Development Office
+    aliases: [housing development office]
+  - name: Waterfront Secretariat
+    aliases: [waterfront secretariat]
+  - name: Major Capital Infrastructure Coordination Office
+    aliases: [major capital infrastructure coordination]
+
+  # --- Parks / environment (renamed and split over 2018-2026) ---
+  - name: Parks and Recreation
+    aliases: [parks and recreation]
+  - name: Environment, Climate and Forestry
+    aliases: [environment climate and forestry]
+  - name: Parks, Forestry and Recreation
+    aliases: [parks forestry and recreation]
+    successors: [Parks and Recreation, "Environment, Climate and Forestry"]
+  - name: Environment and Climate
+    aliases: [environment and climate]
+    successors: ["Environment, Climate and Forestry"]
+  - name: Environment and Energy
+    aliases: [environment and energy, energy and environment]
+    successors: [Environment and Climate, "Environment, Climate and Forestry"]
+
+  # --- Community and Social Services cluster ---
+  - name: Toronto Shelter and Support Services
+    aliases: [toronto shelter and support services, shelter and support services]
+  - name: Shelter, Support and Housing Administration
+    aliases: [shelter support and housing administration]
+    successors: [Toronto Shelter and Support Services]
+  - name: Social Development
+    aliases: [social development finance and administration, social development]
+  - name: Toronto Employment and Social Services
+    aliases: [employment and social services]
+  - name: Children's Services
+    aliases: [children's services, childrens services]
+  - name: Seniors Services and Long-Term Care
+    aliases: [seniors services and long term care, senior services and long term care, long term care homes and services]
+  - name: Toronto Public Health
+    aliases: [toronto public health, medical officer of health, medical officer and health]
+  - name: Toronto Paramedic Services
+    aliases: [paramedic services, chief paramedic]
+  - name: Toronto Fire Services
+    aliases: [fire services, fire chief]
+  - name: Toronto Emergency Management
+    aliases: [toronto emergency management, office of emergency management, emergency management]
+  - name: Economic Development and Culture
+    aliases: [economic development and culture, film commissioner, entertainment industries]
+  - name: Indigenous Affairs Office
+    aliases: [indigenous affairs office]
+  - name: Office of Recovery and Rebuild
+    aliases: [recovery and rebuild]
+
+  # --- Corporate Services / finance ---
+  - name: Chief Financial Officer and Treasurer
+    aliases: [deputy city manager and chief financial officer, chief financial officer and treasurer, chief financial officer, controller]
+  - name: Financial Planning
+    aliases: [financial planning]
+  - name: Accounting Services
+    aliases: [accounting services]
+  - name: Revenue Services
+    aliases: [revenue services]
+  - name: Pension, Payroll and Employee Benefits
+    aliases: [pension payroll and employee benefits]
+  - name: Purchasing and Materials Management
+    aliases: [purchasing and materials management, chief procurement officer, chief purchasing officer]
+  - name: Technology Services
+    aliases: [technology services, chief technology officer, chief techology officer, information and technology, chief information officer]
+  - name: Chief Information Security Officer
+    aliases: [chief information security officer]
+  - name: Customer Experience
+    aliases: [customer experience, 311 toronto, "311"]
+  - name: Fleet Services
+    aliases: [fleet services]
+  - name: Court Services
+    aliases: [court services]
+  - name: Corporate Security
+    aliases: [corporate security]
+  - name: Legal Services
+    aliases: [legal services, city solicitor]
+  - name: City Clerk's Office
+    aliases: [city clerk's office, city clerks office, city clerk]
+  - name: People and Equity
+    aliases: [people and equity, people equity and human rights, chief people officer]
+  - name: Strategic Communications
+    aliases: [strategic communications, strategic public and employee communications, chief communications officer]
+  - name: Strategic and Corporate Policy
+    aliases: [strategic and corporate policy]
+  - name: Policy, Planning, Finance and Administration
+    aliases: [policy planning finance and administration]
+  - name: Finance and Administration
+    aliases: [finance and administration, finance and administraiton]
+  - name: Chief Resilience Office
+    aliases: [chief resilience office, resilience office]
+  - name: Civic Innovation Office
+    aliases: [civic innovation office]
+  - name: Transformation Office
+    aliases: [transformation office]
+  - name: Toronto Office of Partnerships
+    aliases: [toronto office of partnerships]
+  - name: FIFA World Cup 2026
+    aliases: [fifa world cup]
+
+  # --- City Manager and Deputy City Manager offices (clusters) ---
+  - name: City Manager's Office
+    aliases: [city manager's office, city managers office, city manager]
+  - name: Deputy City Manager, Development and Growth Services
+    aliases: [deputy city manager development and growth services, deputy city manager development and growth]
+  - name: Deputy City Manager, Infrastructure Services
+    aliases: [deputy city manager infrastructure services]
+  - name: Deputy City Manager, Infrastructure and Development Services
+    aliases: [deputy city manager infrastructure and development services, deputy city manager infrstrastructure and development services, infrastructure and development services]
+    successors: ["Deputy City Manager, Infrastructure Services", "Deputy City Manager, Development and Growth Services"]
+  - name: Deputy City Manager, Corporate Services
+    aliases: [deputy city manager corporate services]
+  - name: Deputy City Manager, Community and Social Services
+    aliases: [deputy city manager community and social services, deputy city manager community development and social services, deputy city manager communication and social services]
+  - name: Mayor's Office
+    aliases: [mayor]
+
+  # --- Accountability officers ---
+  - name: Auditor General's Office
+    aliases: [auditor general's office, auditor general]
+  - name: Integrity Commissioner
+    aliases: [integrity commissioner]
+  - name: Ombudsman Toronto
+    aliases: [ombudsman]
+  - name: Lobbyist Registrar
+    aliases: [lobbyist registrar]
+  - name: Internal Audit
+    aliases: [internal audit]
+
+  # --- Agencies and corporations ---
+  - name: Toronto Transit Commission
+    aliases: [toronto transit commission, ttc]
+  - name: Toronto Police Service
+    aliases: [toronto police services board, toronto police service, toronto police, chief of police]
+  - name: Toronto Public Library
+    aliases: [toronto public library, city librarian]
+  - name: Toronto Community Housing Corporation
+    aliases: [toronto community housing, tchc]
+  - name: Toronto Seniors Housing Corporation
+    aliases: [toronto seniors housing]
+  - name: Toronto Parking Authority
+    aliases: [toronto parking authority, toront parking authority]
+  - name: CreateTO
+    aliases: [createto, create to]
+  - name: Toronto Hydro
+    aliases: [toronto hydro]
+  - name: Toronto and Region Conservation Authority
+    aliases: [toronto and region conservation authority, trca]
+  - name: Exhibition Place
+    aliases: [exhibition place]
+  - name: Toronto Zoo
+    aliases: [toronto zoo]
+  - name: Waterfront Toronto
+    aliases: [waterfront toronto]
+  - name: Toronto Atmospheric Fund
+    aliases: [toronto atmospheric fund]
+  - name: Toronto Arts Council
+    aliases: [toronto arts council]

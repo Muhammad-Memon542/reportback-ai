@@ -24,3 +24,17 @@ On the Azure for Students subscription, the Foundry create form showed "No avail
 
 **L7. A model can appear in the catalogue but have 0 quota.**
 `gpt-5.4-mini` is listed by `GET /openai/v1/models` on our resource, but deploying it failed with `InsufficientQuota … 0 / 0 quota units`. The catalogue lists what exists, not what this subscription may deploy. Check quota first: ``az cognitiveservices usage list -l <region> --query '[?limit > `0`]' -o table``.
+
+## 2026-11-23 · Phase 1
+
+**L8. TMMIS pages declare UTF-8 but contain Windows-1252 bytes.**
+`0xD7` (×) in the page chrome made a strict UTF-8 decode fail. Decoding the whole page as cp1252 would mangle real UTF-8 elsewhere, so `decode_html` decodes UTF-8 and falls back to cp1252 only for the invalid bytes.
+
+**L9. psycopg 3: without autocommit, `conn.transaction()` after any query is just a SAVEPOINT.**
+The first crawl ran for minutes with zero visible rows: the seed `SELECT` had opened an implicit transaction, so every per-item `with conn.transaction()` became a savepoint and nothing would commit until the end. Fixed by connecting with `autocommit=True` (DECISIONS D19).
+
+**L10. TMMIS headings aren't siblings.** "City Council Decision" is an `h4` nested inside `div.d-info`, so walking an element's direct children missed it. Fix: segment each card in document order by turning every `h4` into a text marker.
+
+**L11. A nonexistent TMMIS item returns HTTP 200** with a ~2 KB page titled "Error". "Not found" is detected from the content, not the status code.
+
+**L12. The "duplicate" directives were mostly not errors.** The same directive closed by several items gets one row per closing item, and directives can reappear in the next term's log. Collapsing by (item, text) and keeping all rows (DECISIONS D14) preserves the ground truth.

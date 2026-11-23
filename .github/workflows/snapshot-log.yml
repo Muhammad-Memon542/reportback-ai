@@ -1,0 +1,42 @@
+name: Snapshot Report Request Log
+
+# "Git scraping" (DECISIONS D10): archive every new version of the Clerk's Report Request Log
+# in data/snapshots/. Commits only when a file changed, or a LAST_CHECKED heartbeat every
+# 30 days (which also keeps this scheduled workflow from being auto-disabled after 60 idle days).
+
+on:
+  schedule:
+    - cron: "23 9 * * *" # daily, 09:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot-log
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --no-dev
+      - name: Archive new log versions
+        run: uv run --no-dev reportback snapshot
+      - name: Commit and push if anything changed
+        run: |
+          if [ -z "$(git status --porcelain -- data/snapshots)" ]; then
+            echo "No new snapshot."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/snapshots
+          git commit -m "snapshot: Report Request Log $(date -u +%F)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

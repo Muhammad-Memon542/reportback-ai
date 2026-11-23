@@ -10,8 +10,12 @@ dependencies = [
     "httpx2>=2.16.2",
     "openai>=3.58.0",
     "openpyxl>=3.1.5",
+    "psycopg[binary]>=3.3.9",
     "pydantic>=2",
     "pydantic-settings>=2.16.3",
+    "pymupdf>=2.1",
+    "pyyaml>=6.0.4",
+    "selectolax>=1.0.2",
     "uvicorn>=0.54.0",
 ]
 
@@ -33,6 +37,7 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.6",
     "types-openpyxl>=3.1.5.20261122",
+    "types-pyyaml>=6.0.12.20261122",
 ]
 
 [tool.ruff]
@@ -47,8 +52,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106"]  # asserts and fake test keys are fine in tests
+"tests/**" = ["S101", "S105", "S106", "DTZ001"]  # asserts, fake keys, naive Excel-style datetimes
 "scripts/**" = ["T201"]                # smoke scripts print by design
+"reportback/cli.py" = ["T201"]         # the CLI prints by design
+"reportback/coverage.py" = ["E501"]    # long SQL and Markdown table strings
 
 [tool.mypy]
 python_version = "3.12"
@@ -60,6 +67,10 @@ warn_unreachable = true
 [[tool.mypy.overrides]]
 module = ["openpyxl.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["reportback.ingest.background"]  # pymupdf ships without type hints
+disallow_untyped_calls = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

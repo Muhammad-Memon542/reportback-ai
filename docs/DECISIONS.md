@@ -64,7 +64,26 @@ The subscription carries the built-in "Allowed resource deployment regions" assi
 - **Embeddings: `text-embedding-3-small`**, 1,536 dims, matching the schema.
 - **No Batch API discount for these models.** The only Global Batch quota is for `gpt-35-turbo`. Phase 3 cost estimates must assume standard pricing, so caching, prefilters and `LINK_MAX_COST_USD` carry the whole cost control.
 
-## Open questions (need a decision before/at Phase 1)
+**D13. `NCF` counts as unresolved, like Open/Due.** (Resolves the earlier Q2; decided by the project owner, 2026-11-23.)
+Both term logs were closed out, and every outstanding request became `NCF` (Not Carried Forward). For discrepancy finding, `log_status ∈ {Open, Due, Ongoing, Pending, NCF}` is treated as "unresolved per the log". So "log says unresolved, but a later report responds" is a discrepancy whether the row says Open or NCF. The published status is still stored and shown verbatim; only the normalized `log_status_norm` and the discrepancy rule group them.
 
-**Q2. What does "open/overdue" mean now that both term logs have been closed out?**
-See DATASHEET: the 2022–2026 snapshot (2026-11-13) has **no** Open/Due/Ongoing rows; outstanding requests are `NCF` (Not Carried Forward). The plan's discrepancy rule "`log_status=Open/Overdue` but `delivered`" should become "`log_status ∈ {NCF, Open, Due, Ongoing}` but `delivered`". The 2026–2030 term log (new council sworn in Nov 2026) will reintroduce Open/Due rows as it's published.
+## 2026-11-23 · Phase 1
+
+**D14. One `directive` per (item, text); every log row kept in `log_entry`.**
+The log sometimes repeats a directive: one row per closing item, or the same directive in both term logs (NCF in 2018–2022, Closed in 2022–2026). `directive_id = sha256(normalized item ID | whitespace-normalized text)[:20]`.
+- Aggregates come from the **most recent** snapshot that lists the directive: verbatim `log_status` (distinct values joined with ` | `), `log_status_norm` (or `mixed`), the union of closing items, and the assignees.
+- Raw rows are never discarded.
+- Directives that no log row points to any more (e.g. after an item-number repair rule changes their key) are deleted, so re-runs converge.
+
+**D15. Due dates are conservative.**
+`due_date` is the end of the stated window (Q2 2024 → 2024-06-30; "In 2025" → 2025-12-31; "July 2024" → 2024-07-31). These get no due date, and a `due_rule` saying why: budget-relative, recurring, conditional ("If necessary", "Once regulations are released") and meeting-relative timings, and ambiguous d/m dates (`10/11/2023`). The Clerk's "Date for Order" is kept as `clerk_order_date` but **not** used: 1,191 rows carry the term-end placeholders 2022-11-14 / 2026-11-14.
+
+**D16. Item-ID repair and year inference.** Malformed IDs in the log are repaired only where the intent is unambiguous: a missing dot, an extra dot, a hyphen, a space. Year labels for short forms come from a meeting index built from well-formed IDs, restricted to the row's term or narrowed by a nearby date. If more than one year fits, the reference is skipped. A stray-digit year (`20263MM42.22`) is accepted only if the index confirms it.
+
+**D17. TMMIS crawl scope and privacy.** Seeds are the 2022–2026 directives' items, their closing items, and voted items, plus `cites` targets whose year label falls in the term. Expansion is one hop per run. "Communications" (public letters) and "Speakers" (deputants) are reduced to counts; motions and per-motion vote tables on the page are skipped (votes come from CKAN). Text we store is passed through `scrub_pii`.
+
+**D18. Background files downloaded by default: `report`, `letter`, `briefing_note`.** Briefing notes are included because the log's "Closed by" sometimes names one (`BN14-Jan 26`). Attachments, notices, presentations, budget notes and mayoral directions are listed in `doc` but not downloaded unless asked (`--kinds`). PDFs over 40 MB or not starting with `%PDF` are marked `skipped`.
+
+**D19. DB connections are autocommit.** Each `with conn.transaction():` is then a real transaction (see LESSONS L9), so the crawler commits item by item and an interruption loses nothing.
+
+**D20. PyMuPDF is AGPL-3.0.** The plan names it, and it's the most reliable extractor for these PDFs (fonts and bold flags drive the heading detection). Using it means the deployed service's source must be available under AGPL terms. That's compatible with a public repository, but the project licence you choose must allow it. If that's a problem: pdfplumber (MIT) is the fallback, at the cost of slower parsing.

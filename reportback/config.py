@@ -53,12 +53,20 @@ class Settings(BaseSettings):
     # Descriptive UA. Optional contact URL comes from env; no personal data is hard-coded.
     http_contact_url: str | None = None
 
+    # --- Database ---
+    database_url: str | None = None  # e.g. postgresql://user:pass@localhost:5432/reportback
+
     # --- Paths ---
     data_dir: Path = Path("data")
 
     @property
     def raw_dir(self) -> Path:
         return self.data_dir / "raw"
+
+    @property
+    def snapshots_dir(self) -> Path:
+        """Committed archive of source snapshots (unlike raw_dir, which is a local cache)."""
+        return self.data_dir / "snapshots"
 
     @property
     def user_agent(self) -> str:
