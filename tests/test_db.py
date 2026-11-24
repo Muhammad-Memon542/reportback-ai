@@ -12,3 +12,12 @@ def test_migrate_is_idempotent(db: Conn) -> None:
     assert migrate(db) == []  # fixture already applied everything
     counts = table_counts(db, ["directive", "item", "doc", "cites", "vote"])
     assert counts == {"directive": 0, "item": 0, "doc": 0, "cites": 0, "vote": 0}
+
+
+def test_coverage_report_renders_on_empty_db(db: Conn) -> None:
+    from reportback.coverage import build_report
+
+    md = build_report(db)
+    assert md.startswith("# Coverage report")
+    assert "Open Government Licence – Toronto" in md
+    assert "## 6. Preview" in md

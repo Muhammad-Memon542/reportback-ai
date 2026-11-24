@@ -382,14 +382,15 @@ def crawl_items(
     *,
     term: str,
     limit: int | None = None,
-    refetch: bool = False,
+    reparse: bool = False,
     mapper: DivisionMapper | None = None,
 ) -> dict[str, Any]:
-    """Fetch (or re-parse from cache with refetch) the current frontier: one hop per run."""
+    """Fetch the current frontier (one hop per run), or with `reparse` re-parse every
+    already-fetched item from the raw cache (no new pages, e.g. after a parser change)."""
     mapper = mapper or default_mapper()
     seeds = seed_item_ids(conn, term)
     done = {r[0] for r in conn.execute("SELECT item_id FROM item WHERE fetch_status IN ('ok', 'not_found')")}
-    frontier = sorted(seeds if refetch else seeds - done)
+    frontier = sorted(done if reparse else seeds - done)
     if limit is not None:
         frontier = frontier[:limit]
     stats: dict[str, Any] = {

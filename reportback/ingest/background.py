@@ -182,8 +182,13 @@ def ingest_background(
     limit: int | None = None,
     kinds: tuple[str, ...] = ("report", "letter", "briefing_note"),
     retry_errors: bool = False,
+    reparse: bool = False,
 ) -> dict[str, Any]:
-    statuses = "fetch_status IS NULL" + (" OR fetch_status = 'error'" if retry_errors else "")
+    """Download and split new files; with `reparse`, re-split already-downloaded ones from cache."""
+    if reparse:
+        statuses = "fetch_status = 'ok'"
+    else:
+        statuses = "fetch_status IS NULL" + (" OR fetch_status = 'error'" if retry_errors else "")
     todo = conn.execute(
         f"SELECT doc_id, url FROM doc WHERE kind = ANY(%s) AND ({statuses}) ORDER BY doc_id",  # noqa: S608 (fixed strings only)
         (list(kinds),),

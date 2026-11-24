@@ -78,13 +78,17 @@ def cmd_ingest(settings: Settings, args: argparse.Namespace) -> int:
             from reportback.ingest.tmmis import crawl_items
 
             with PoliteClient(settings) as http:
-                _print(crawl_items(conn, http, term=args.term, limit=args.limit, refetch=args.refetch))
+                _print(crawl_items(conn, http, term=args.term, limit=args.limit, reparse=args.reparse))
         elif args.source == "background":
             from reportback.ingest.background import ingest_background
             from reportback.ingest.http import PoliteClient
 
             with PoliteClient(settings) as http:
-                _print(ingest_background(conn, http, limit=args.limit, kinds=tuple(args.kinds.split(","))))
+                _print(
+                    ingest_background(
+                        conn, http, limit=args.limit, kinds=tuple(args.kinds.split(",")), reparse=args.reparse
+                    )
+                )
         elif args.source == "citegraph":
             from reportback.ingest.citegraph import build_citegraph
 
@@ -120,7 +124,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     ing.add_argument("source", choices=["log", "votes", "tmmis", "background", "citegraph"])
     ing.add_argument("--term", default="2022-2026", help="council term (votes, tmmis seeds)")
     ing.add_argument("--limit", type=int, default=None, help="max items/files to fetch this run")
-    ing.add_argument("--refetch", action="store_true", help="tmmis: re-parse already fetched items")
+    ing.add_argument(
+        "--reparse",
+        action="store_true",
+        help="tmmis/background: re-parse already-fetched pages/files from cache",
+    )
     ing.add_argument(
         "--kinds",
         default="report,letter,briefing_note",

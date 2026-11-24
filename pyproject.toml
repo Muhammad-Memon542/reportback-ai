@@ -53,7 +53,8 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "DTZ001"]  # asserts, fake keys, naive Excel-style datetimes
-"scripts/**" = ["T201"]                # smoke scripts print by design
+"scripts/**" = ["T201", "S608"]        # scripts print; SQL built from fixed identifiers
+"evals/**" = ["T201", "S311"]          # eval scripts print; seeded sampling is not crypto
 "reportback/cli.py" = ["T201"]         # the CLI prints by design
 "reportback/coverage.py" = ["E501"]    # long SQL and Markdown table strings
 

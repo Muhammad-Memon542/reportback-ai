@@ -20,10 +20,14 @@ ReportBack links Toronto City Council's report-back directives (from the City Cl
 
 ## Commands (keep updated)
 - `uv sync` · `uv run pre-commit install`
-- Checks: `uv run pytest -q && uv run ruff check . && uv run ruff format --check . && uv run mypy`
+- Checks: `uv run pytest -q && uv run ruff check . && uv run ruff format --check . && uv run mypy` (set `TEST_DATABASE_URL` to also run the Postgres tests)
 - `uv run python scripts/smoke_llm.py` · `uv run python scripts/smoke_ckan.py`
 - `uv run reportback serve` (local API, `GET /healthz`)
-- `uv run reportback ingest log|votes|tmmis|background|citegraph` · `uv run reportback index`
+- `uv run reportback db migrate`
+- `uv run reportback snapshot` (archive new Report Request Log versions into `data/snapshots/`; also runs daily in GitHub Actions)
+- Ingest order: `uv run reportback ingest log` → `ingest votes` → `ingest tmmis` → `ingest background` → `ingest citegraph` → repeat `ingest tmmis` (next hop) / `background` / `citegraph`
+- `uv run reportback coverage` (writes `docs/COVERAGE.md`)
+- `uv run python evals/citegraph_sample.py` · `uv run python evals/citegraph_precision.py`
 - `uv run reportback link --max-cost 5`
 - `uv run python evals/run_evals.py --suite cheap` / `--suite full`
 - `azd up`
