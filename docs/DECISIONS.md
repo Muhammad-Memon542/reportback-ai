@@ -82,7 +82,7 @@ The log sometimes repeats a directive: one row per closing item, or the same dir
 
 **D17. TMMIS crawl scope and privacy.** Seeds are the 2022–2026 directives' items, their closing items, and voted items, plus `cites` targets whose year label falls in the term. Expansion is one hop per run. "Communications" (public letters) and "Speakers" (deputants) are reduced to counts; motions and per-motion vote tables on the page are skipped (votes come from CKAN). Text we store is passed through `scrub_pii`.
 
-**D18. Background files downloaded by default: `report`, `letter`, `briefing_note`.** Briefing notes are included because the log's "Closed by" sometimes names one (`BN14-Jan 26`). Attachments, notices, presentations, budget notes and mayoral directions are listed in `doc` but not downloaded unless asked (`--kinds`). PDFs over 40 MB or not starting with `%PDF` are marked `skipped`.
+**D18. Background files downloaded by default: `report`, `letter`, `briefing_note`, `answer`.** (`answer` = a staff answer to an administrative inquiry, also a kind of report-back.) Briefing notes are included because the log's "Closed by" sometimes names one (`BN14-Jan 26`). Attachments, notices, presentations, budget notes and mayoral directions are listed in `doc` but not downloaded unless asked (`--kinds`). PDFs over 40 MB or not starting with `%PDF` are marked `skipped`.
 
 **D19. DB connections are autocommit.** Each `with conn.transaction():` is then a real transaction (see LESSONS L9), so the crawler commits item by item and an interruption loses nothing.
 

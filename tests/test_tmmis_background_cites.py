@@ -102,6 +102,13 @@ def test_member_motion_and_missing_item() -> None:
         ("2023 Capital and Operating Budget Notes - Toronto Water", "budget"),
         ("Mayoral Direction to City Officials to direct the City Manager", "mayoral_direction"),
         ("Member Motion MM11.16", "motion"),
+        ("Revised Member Motion MM6.23", "motion"),
+        ("Revised Report and Attachment 1 from the General Manager, Toronto Water", "report"),
+        ("Ombudsman Toronto Report: An Investigation into the City", "report"),
+        ("Answer from the City Manager on Administrative Inquiry", "answer"),
+        ("Fiscal Impact Statement from the Chief Financial Officer", "financial_impact"),
+        ("Financial Impact Summary Sheet for Member Motions MM19.1", "financial_impact"),
+        ("Transmittal from the Director, Commission Services", "letter"),
         ("(February 3, 2023) Notice of Public Meeting", "notice"),
         ("(December 6, 2022) Presentation from the Chief Planner", "presentation"),
     ],
@@ -197,3 +204,16 @@ def test_fixture_count() -> None:
     files = [p for p in FIXTURES.rglob("*") if p.is_file() and p.suffix in {".html", ".pdf", ".csv", ".json"}]
     assert log_rows + len(files) >= 15
     assert Path(TMMIS / "2023.EX99.99.html").exists()
+
+
+def test_bold_table_cells_are_not_headings() -> None:
+    """backgroundfile-230137 (2023.EX1.4 staff report) has bold ALL-CAPS budget-table cells
+    ('TOTAL', 'OPA/ZBA', 'GRAND TOTAL') at body size; only the template headings split it."""
+    r = parse_pdf((FIXTURES / "background" / "backgroundfile-230137.pdf").read_bytes())
+    assert [s.section for s in r.sections] == [
+        "PREAMBLE", "SUMMARY", "RECOMMENDATIONS", "FINANCIAL IMPACT", "EQUITY IMPACT STATEMENT",
+        "DECISION HISTORY", "COMMENTS", "CONTACT", "SIGNATURE", "ATTACHMENTS",
+    ]  # fmt: skip
+    by_name = {s.section: s for s in r.sections}
+    assert "TOTAL" in by_name["COMMENTS"].lines  # page-8 table cell stays inside COMMENTS
+    assert "GRAND TOTAL" in by_name["ATTACHMENTS"].text  # page-20 table, after ATTACHMENTS (p. 17)

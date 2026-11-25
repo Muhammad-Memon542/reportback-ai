@@ -38,3 +38,5 @@ The first crawl ran for minutes with zero visible rows: the seed `SELECT` had op
 **L11. A nonexistent TMMIS item returns HTTP 200** with a ~2 KB page titled "Error". "Not found" is detected from the content, not the status code.
 
 **L12. The "duplicate" directives were mostly not errors.** The same directive closed by several items gets one row per closing item, and directives can reappear in the next term's log. Collapsing by (item, text) and keeping all rows (DECISIONS D14) preserves the ground truth.
+
+**L13. Bold ALL-CAPS table cells looked like section headings.** Budget tables in staff reports have bold cells such as "TOTAL", "SOGR" and "($M)", which split sections. Template headings are set larger than body text (12.8–13 pt against 12 pt), while table cells are at or below body size. A heading now has to be a known template heading, or bold, all-caps and at least 0.4 pt larger than the body size (the font size carrying the most characters).

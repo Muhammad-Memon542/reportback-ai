@@ -111,7 +111,7 @@ def classify_doc(description: str) -> str:
         return "attachment"
     if "presentation" in d:
         return "presentation"
-    if re.match(r"member motion\b", d):
+    if re.match(r"(revised\s+)?member motion\b", d):
         return "motion"
     if re.match(r"mayoral (direction|decision)", d):
         return "mayoral_direction"
@@ -119,9 +119,18 @@ def classify_doc(description: str) -> str:
         return "briefing_note"
     if re.search(r"budget notes|capital plan detail|operating budget|capital budget", d):
         return "budget"
-    if re.match(r"(supplementary\s+)?report\b", d) or "report from" in d or "supplementary report" in d:
+    if re.match(r"(fiscal|financial) impact (statement|summary)", d):
+        return "financial_impact"
+    if (
+        re.match(r"((revised|supplementary|updated|joint)\s+)*report\b", d)
+        or "report from" in d
+        or "supplementary report" in d
+        or re.search(r"\breport:", d)
+    ):
         return "report"
-    if re.match(r"(joint\s+)?letter\b", d) or "letter from" in d:
+    if re.match(r"answer from\b", d):
+        return "answer"  # staff answer to an administrative inquiry
+    if re.match(r"(joint\s+)?letter\b", d) or "letter from" in d or re.match(r"transmittal from\b", d):
         return "letter"
     if re.match(r"(public\s+)?notice\b", d):
         return "notice"

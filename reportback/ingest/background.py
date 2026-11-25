@@ -66,6 +66,7 @@ class _Line:
     page: int
     text: str
     bold: bool
+    size: float
 
 
 def _is_bold(span: dict[str, Any]) -> bool:
@@ -84,8 +85,17 @@ def _extract_lines(doc: pymupdf.Document) -> list[_Line]:
                     continue
                 text = norm_ws("".join(str(s["text"]) for s in line["spans"]))
                 if text:
-                    out.append(_Line(pno + 1, text, all(_is_bold(s) for s in spans)))
+                    size = max(float(s.get("size", 0.0)) for s in spans)
+                    out.append(_Line(pno + 1, text, all(_is_bold(s) for s in spans), size))
     return out
+
+
+def _body_size(lines: list[_Line]) -> float:
+    """The font size carrying the most characters: the report's body text."""
+    weight: Counter[float] = Counter()
+    for ln in lines:
+        weight[round(ln.size, 1)] += len(ln.text)
+    return weight.most_common(1)[0][0] if weight else 0.0
 
 
 def _running_lines(lines: list[_Line], pages: int) -> set[str]:
@@ -99,13 +109,18 @@ def _running_lines(lines: list[_Line], pages: int) -> set[str]:
     return {k for k, pg in per_page.items() if len(pg) >= max(3, int(pages * 0.6))}
 
 
-def _is_heading(ln: _Line) -> bool:
+def _is_heading(ln: _Line, body_size: float) -> bool:
+    """Known template heading, or a bold ALL-CAPS line set LARGER than body text.
+
+    The size test keeps bold all-caps table cells ('TOTAL', 'SOGR', '($M)') - which are set
+    at or below body size - from splitting sections (LESSONS L13)."""
     t = ln.text.strip().rstrip(":")
     if t in KNOWN_HEADINGS:
         return True
     letters = re.sub(r"[^A-Za-z]", "", t)
     return bool(
         ln.bold
+        and ln.size >= body_size + 0.4
         and 3 <= len(t) <= 60
         and letters
         and letters.isupper()
@@ -122,6 +137,7 @@ def parse_pdf(content: bytes) -> ParsedPdf:
     finally:
         doc.close()
     running = _running_lines(lines, pages)
+    body_size = _body_size(lines)
     report_type = None
     header: dict[str, str] = {}
     sections: list[Section] = [Section("PREAMBLE", 1, 1)]
@@ -136,7 +152,7 @@ def parse_pdf(content: bytes) -> ParsedPdf:
             if m:
                 key = "wards" if m.group(1).lower().startswith("ward") else m.group(1).lower()
                 header.setdefault(key, m.group(2))
-        if _is_heading(ln):
+        if _is_heading(ln, body_size):
             sections.append(Section(ln.text.strip().rstrip(":").upper(), ln.page, ln.page))
             continue
         cur = sections[-1]
@@ -180,7 +196,7 @@ def ingest_background(
     http: PoliteClient,
     *,
     limit: int | None = None,
-    kinds: tuple[str, ...] = ("report", "letter", "briefing_note"),
+    kinds: tuple[str, ...] = ("report", "letter", "briefing_note", "answer"),
     retry_errors: bool = False,
     reparse: bool = False,
 ) -> dict[str, Any]:

@@ -131,7 +131,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     ing.add_argument(
         "--kinds",
-        default="report,letter,briefing_note",
+        default="report,letter,briefing_note,answer",
         help="background: doc kinds to download (comma-separated)",
     )
 
