@@ -119,7 +119,8 @@ def _is_heading(ln: _Line, body_size: float) -> bool:
         return True
     letters = re.sub(r"[^A-Za-z]", "", t)
     return bool(
-        ln.bold
+        t[:1].isalnum()  # the City logo extracts as '~TORONTO' (bold, large): not a heading
+        and ln.bold
         and ln.size >= body_size + 0.4
         and 3 <= len(t) <= 60
         and letters

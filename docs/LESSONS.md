@@ -40,3 +40,14 @@ The first crawl ran for minutes with zero visible rows: the seed `SELECT` had op
 **L12. The "duplicate" directives were mostly not errors.** The same directive closed by several items gets one row per closing item, and directives can reappear in the next term's log. Collapsing by (item, text) and keeping all rows (DECISIONS D14) preserves the ground truth.
 
 **L13. Bold ALL-CAPS table cells looked like section headings.** Budget tables in staff reports have bold cells such as "TOTAL", "SOGR" and "($M)", which split sections. Template headings are set larger than body text (12.8–13 pt against 12 pt), while table cells are at or below body size. A heading now has to be a known template heading, or bold, all-caps and at least 0.4 pt larger than the body size (the font size carrying the most characters).
+
+**L14. The City logo extracts as text.** On many reports the wordmark comes out of PyMuPDF as a bold, large "~TORONTO" (or a misread "~TORONIO") and was taken as a heading 260 times. Headings must now start with a letter or digit.
+
+**L15. The first citation graph had predictable false positives.** Crawling hop 2 found 19 cited IDs that don't exist on TMMIS, which showed the causes:
+- Official Plan zoning codes in scanned maps ("CR3.0" — CR is also a committee code).
+- Footnote markers glued onto IDs ("2025.EX20.12" + footnote 3).
+- "In May 2017" not recognized as a year hint, so the meeting index picked 2025.
+- Term-boundary board meetings (Preservation Board, Nov 7, 2022, still the old term).
+- Typos in the source documents ("2025.IEC22.8").
+
+Fixes: item and meeting numbers must be ≥ 1; month-year hints; short forms can't resolve to an item later than the citing document; ambiguous Nov/Dec election-year dates are skipped; edges to targets TMMIS says don't exist are footnote-repaired when the ID minus its last digit exists, and dropped otherwise.

@@ -83,7 +83,11 @@ def infer_year(
         if candidates:
             candidates &= near
         elif allowed_years is None:
-            candidates = {year_label_for_date(hint)}
+            # No index entry: trust the date's year, except across a term boundary (Nov/Dec of
+            # an election year), where boards/committees switch terms at different times.
+            if hint.year in ELECTION_YEARS and hint.month >= 11:
+                return None
+            candidates = {hint.year}
     return candidates.pop() if len(candidates) == 1 else None
 
 

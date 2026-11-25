@@ -217,3 +217,15 @@ def test_bold_table_cells_are_not_headings() -> None:
     by_name = {s.section: s for s in r.sections}
     assert "TOTAL" in by_name["COMMENTS"].lines  # page-8 table cell stays inside COMMENTS
     assert "GRAND TOTAL" in by_name["ATTACHMENTS"].text  # page-20 table, after ATTACHMENTS (p. 17)
+
+
+def test_heading_rule_edge_cases() -> None:
+    from reportback.ingest.background import _is_heading, _Line
+
+    body = 12.0
+    assert _is_heading(_Line(1, "SUMMARY", True, 12.0), body)  # known template heading, any size
+    assert _is_heading(_Line(1, "THE APPLICATION", True, 13.0), body)  # bold caps, larger than body
+    assert not _is_heading(_Line(1, "TOTAL", True, 12.0), body)  # bold table cell at body size
+    assert not _is_heading(_Line(1, "~TORONTO", True, 20.0), body)  # City logo extracted as text
+    assert not _is_heading(_Line(1, "REPORT FOR ACTION", True, 18.0), body)
+    assert not _is_heading(_Line(1, "Background", True, 13.0), body)  # mixed case: subheading
