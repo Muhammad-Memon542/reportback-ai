@@ -86,7 +86,12 @@ def cmd_ingest(settings: Settings, args: argparse.Namespace) -> int:
             with PoliteClient(settings) as http:
                 _print(
                     ingest_background(
-                        conn, http, limit=args.limit, kinds=tuple(args.kinds.split(",")), reparse=args.reparse
+                        conn,
+                        http,
+                        limit=args.limit,
+                        kinds=tuple(args.kinds.split(",")),
+                        reparse=args.reparse,
+                        retry_errors=args.retry_errors,
                     )
                 )
         elif args.source == "citegraph":
@@ -124,6 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ing.add_argument("source", choices=["log", "votes", "tmmis", "background", "citegraph"])
     ing.add_argument("--term", default="2022-2026", help="council term (votes, tmmis seeds)")
     ing.add_argument("--limit", type=int, default=None, help="max items/files to fetch this run")
+    ing.add_argument("--retry-errors", action="store_true", help="background: retry files that failed before")
     ing.add_argument(
         "--reparse",
         action="store_true",

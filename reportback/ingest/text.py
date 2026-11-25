@@ -28,7 +28,7 @@ def decode_html(content: bytes) -> str:
 
 
 def norm_ws(text: str) -> str:
-    return _WS.sub(" ", text).strip()
+    return _WS.sub(" ", text.replace("\x00", "")).strip()
 
 
 # PII scrubbing for any text we index. Officials' names stay (public role); contact details go.
@@ -43,5 +43,6 @@ PHONE_TOKEN = "[phone removed]"  # noqa: S105
 
 
 def scrub_pii(text: str) -> str:
-    """Remove email addresses and North American phone numbers."""
-    return _PHONE.sub(PHONE_TOKEN, _EMAIL.sub(EMAIL_TOKEN, text))
+    """Remove email addresses and North American phone numbers (and NUL bytes, which some
+    PDFs' text layers contain and Postgres text columns reject)."""
+    return _PHONE.sub(PHONE_TOKEN, _EMAIL.sub(EMAIL_TOKEN, text.replace("\x00", "")))

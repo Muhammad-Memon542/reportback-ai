@@ -34,8 +34,8 @@ _A = "\x00A\x00"
 _END = "\x00"
 _DATE_IN_TEXT = re.compile(
     r"\b(January|February|March|April|May|June|July|August|September|October|November|December)"
-    r"\s+(\d{1,2})(?:(?:,\s*|\s+and\s+|\s*-\s*)\d{1,2})*,?\s+(\d{4})"
-)  # 'November 30, 2022', 'December 14 and 15, 2022', 'March 29, 30 and 31, 2023'
+    r"\s+(\d{1,2})(?:(?:,\s*(?:and\s+)?|\s+and\s+|\s*-\s*)\d{1,2})*,?\s+(\d{4})"
+)  # 'November 30, 2022', 'December 14 and 15, 2022', 'March 29, 30 and 31, 2023', 'July 14, 15, and 16, 2021'
 _DOC_ID = re.compile(r"/(backgroundfile-\d+)\.pdf$", re.IGNORECASE)
 _COMM = re.compile(r"/communicationfile-\d+\.pdf$", re.IGNORECASE)
 DECISION_SECTIONS = ("decision", "committee recommendations", "decision advice and other information")
@@ -360,7 +360,8 @@ def save_item(conn: Conn, page: ItemPage, url: str, content_hash: str, mapper: D
                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                    ON CONFLICT (doc_id) DO UPDATE SET kind = EXCLUDED.kind,
                        description = EXCLUDED.description, title = EXCLUDED.title,
-                       report_date = EXCLUDED.report_date, from_officials = EXCLUDED.from_officials,
+                       report_date = coalesce(EXCLUDED.report_date, doc.report_date),
+                       from_officials = EXCLUDED.from_officials,
                        divisions = EXCLUDED.divisions, url = EXCLUDED.url""",
                 (d.doc_id, page.item_id, d.kind, d.description, d.title, d.report_date,
                  d.from_officials, mapper.map(d.from_officials), d.url),

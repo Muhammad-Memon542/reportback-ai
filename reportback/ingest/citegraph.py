@@ -23,7 +23,9 @@ from reportback.ingest.tmmis import parse_first_date
 
 SHORT_IN_TEXT = re.compile(r"(?<![\w.])([A-Z]{2,4})(\d{1,3})\.(\d{1,3})(?![\w]|\.\d)")
 _MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December"
-_DATE_ANY = re.compile(rf"\b(?:{_MONTHS})\s+\d{{1,2}}(?:(?:,\s*|\s+and\s+|\s*-\s*)\d{{1,2}})*,?\s+\d{{4}}")
+_DATE_ANY = re.compile(
+    rf"\b(?:{_MONTHS})\s+\d{{1,2}}(?:(?:,\s*(?:and\s+)?|\s+and\s+|\s*-\s*)\d{{1,2}})*,?\s+\d{{4}}"
+)  # incl. the serial comma: 'July 14, 15, and 16, 2021' (precision sample row 39)
 _MONTH_YEAR = re.compile(rf"\b({_MONTHS})\s+(\d{{4}})\b")  # 'In May 2017, through MM29.47'
 _MONTH_NO = {m: i for i, m in enumerate(_MONTHS.split("|"), start=1)}
 HINT_WINDOW = 400

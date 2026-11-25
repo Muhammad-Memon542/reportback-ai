@@ -51,3 +51,7 @@ The first crawl ran for minutes with zero visible rows: the seed `SELECT` had op
 - Typos in the source documents ("2025.IEC22.8").
 
 Fixes: item and meeting numbers must be ≥ 1; month-year hints; short forms can't resolve to an item later than the citing document; ambiguous Nov/Dec election-year dates are skipped; edges to targets TMMIS says don't exist are footnote-repaired when the ID minus its last digit exists, and dropped otherwise.
+
+**L16. Some PDF text layers contain NUL bytes**, and Postgres `text` rejects them (`backgroundfile-230424`). `scrub_pii` and `norm_ws` now drop `\x00`.
+
+**L17. Two writers of one column made the result depend on run order.** `doc.report_date` comes from the TMMIS listing ("(February 9, 2023) Report from …") or, failing that, from the PDF's `Date:` header. Re-parsing TMMIS pages overwrote the PDF-derived date with NULL, which a later PDF re-parse restored, and `scripts/check_idempotency.py` caught it. The TMMIS upsert now keeps an existing date when the listing has none.

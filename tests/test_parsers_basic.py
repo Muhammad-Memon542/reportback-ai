@@ -167,6 +167,7 @@ def test_scrub_pii() -> None:
     # Things that look numeric but are not phone numbers survive.
     keep = "Item 2023.EX3.1 on 2024-06-30 cost $1,234,567 in Ward 12 (By-law 286-2023)"
     assert scrub_pii(keep) == keep
+    assert scrub_pii("a\x00b") == "ab"  # NUL bytes from some PDF text layers
 
 
 def test_decode_html_mixed_encoding() -> None:

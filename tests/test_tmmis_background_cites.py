@@ -229,3 +229,38 @@ def test_heading_rule_edge_cases() -> None:
     assert not _is_heading(_Line(1, "~TORONTO", True, 20.0), body)  # City logo extracted as text
     assert not _is_heading(_Line(1, "REPORT FOR ACTION", True, 18.0), body)
     assert not _is_heading(_Line(1, "Background", True, 13.0), body)  # mixed case: subheading
+
+
+def test_serial_comma_dates_give_year_hints() -> None:
+    """Precision-sample row 39: 'On July 14, 15, and 16, 2021, City Council adopted PH25.2'."""
+    assert parse_first_date("July 14, 15, and 16, 2021") == date(2021, 7, 14)
+    text = "On July 14, 15, and 16, 2021, City Council adopted PH25.2, the Housing Now plan."
+    cites, _ = extract_citations(text, MeetingIndex(["2021.PH25.1", "2025.PH25.3"]), {"PH"})
+    assert [c.item_id for c in cites] == ["2021.PH25.2"]
+    # Without a 2021 entry in the index the reference is skipped, never guessed as 2025.
+    cites, skipped = extract_citations(text, MeetingIndex(["2025.PH25.3"]), {"PH"})
+    assert cites == [] and skipped == 1
+
+
+def test_month_year_hint_and_future_guard() -> None:
+    text = "In May 2017, through MM29.47, Council requested a study."
+    cites, skipped = extract_citations(text, MeetingIndex(["2025.MM29.1"]), {"MM"})
+    assert cites == [] and skipped == 1  # 2017 hint rules out the only indexed year (2025)
+    cites, skipped = extract_citations("See EX12.3.", MeetingIndex(["2025.EX12.1"]), {"EX"}, max_year=2024)
+    assert cites == [] and skipped == 1  # a 2024 document cannot cite a 2025 item by short form
+    cites, _ = extract_citations("Map: CR3.0 (c2.0; r3.0)", MeetingIndex(["2024.CR3.1"]), {"CR"})
+    assert cites == []  # Official Plan land-use code, not item 0
+
+
+def test_reparsing_item_keeps_pdf_report_date(db: Conn) -> None:
+    """LESSONS L17: an item re-parse must not wipe a report_date that came from the PDF."""
+    p = page("2023.PH2.1")
+    url = ITEM_URL.format(item_id=p.item_id)
+    save_item(db, p, url, "h", default_mapper())
+    db.execute(
+        "UPDATE doc SET report_date = '2023-02-03' WHERE doc_id = 'backgroundfile-234497'"
+    )  # attachment
+    save_item(db, p, url, "h", default_mapper())  # its listing has no date
+    assert db.execute("SELECT report_date FROM doc WHERE doc_id = 'backgroundfile-234497'").fetchone() == (
+        date(2023, 2, 3),
+    )
