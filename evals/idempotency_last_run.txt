@@ -1,0 +1,11 @@
+# scripts/check_idempotency.py, 2026-11-25 (run before the result file existed; output copied from the run log)
+log_snapshot         rows       2 ->       2  unchanged
+directive            rows   4,395 ->   4,395  unchanged
+log_entry            rows   4,434 ->   4,434  unchanged
+vote                 rows  46,815 ->  46,815  unchanged
+item                 rows   2,930 ->   2,930  unchanged
+item_consideration   rows   4,134 ->   4,134  unchanged
+doc                  rows   7,530 ->   7,530  unchanged
+doc_section          rows  23,561 ->  23,561  unchanged
+cites                rows   7,940 ->   7,940  unchanged
+IDEMPOTENT

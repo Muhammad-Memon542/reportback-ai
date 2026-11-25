@@ -170,7 +170,7 @@ def build_report(conn: Conn) -> str:
     targets = _one(conn, "SELECT count(DISTINCT to_item_id) FROM cites") or 0
     parts += [
         "",
-        f"Distinct cited items: {targets:,}. Precision on 100 hand-checked matches: see `evals/citegraph_precision.csv` and the README.",
+        f"Distinct cited items: {targets:,}. Precision on 100 hand-checked matches: see section 7.",
     ]
 
     # --- Preview for Phase 3
@@ -198,8 +198,51 @@ def build_report(conn: Conn) -> str:
     return "\n".join(parts) + "\n"
 
 
+def acceptance_section(root: Path) -> str:
+    """Citation-graph precision (from the hand-labelled sample) and the last idempotency run."""
+    import csv
+    from collections import Counter
+
+    parts = ["", "## 7. Phase 1 acceptance checks", ""]
+    sample = root / "evals" / "citegraph_precision.csv"
+    if sample.exists():
+        rows = list(csv.DictReader(sample.open(encoding="utf-8")))
+        tot: Counter[str] = Counter()
+        ok: Counter[str] = Counter()
+        for r in rows:
+            for k in (r["method"], "all"):
+                tot[k] += 1
+                ok[k] += r["label"] == "1"
+        parts += [
+            "**Citation-graph precision** on a hand-checked, stratified random sample "
+            "(`evals/citegraph_precision.csv`; labelling rule in `evals/citegraph_sample.py`):",
+            "",
+            _table(
+                ["matches", "correct", "precision"],
+                [
+                    (k, f"{ok[k]}/{tot[k]}", _pct(ok[k], tot[k]))
+                    for k in ("full", "short_inferred", "all")
+                    if tot[k]
+                ],
+            ),
+            "",
+            "The one error (a serial-comma date gave no year hint) was fixed afterwards, with a regression test.",
+        ]
+    run = root / "evals" / "idempotency_last_run.txt"
+    if run.exists():
+        parts += [
+            "",
+            "**Idempotency** (re-running every ingest step):",
+            "",
+            "```",
+            run.read_text().strip(),
+            "```",
+        ]
+    return "\n".join(parts) + "\n"
+
+
 def write_coverage_report(conn: Conn, settings: Settings, out: str) -> Path:
     path = Path(out)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(build_report(conn), encoding="utf-8")
+    path.write_text(build_report(conn) + acceptance_section(Path.cwd()), encoding="utf-8")
     return path

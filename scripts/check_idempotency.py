@@ -10,6 +10,8 @@ background (re-parse cached PDFs) / citegraph, and fingerprints again.
 from __future__ import annotations
 
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 
 from reportback.config import get_settings
 from reportback.db import Conn, connect
@@ -21,6 +23,8 @@ from reportback.ingest.http import PoliteClient
 from reportback.ingest.report_log import SnapshotStore, ingest_report_log
 from reportback.ingest.tmmis import crawl_items
 from reportback.ingest.votes import ingest_votes
+
+RESULT = Path(__file__).resolve().parent.parent / "evals" / "idempotency_last_run.txt"
 
 TABLES = {  # table -> (order by, columns to exclude)
     "log_snapshot": ("snapshot_id", {"ingested_at"}),
@@ -67,11 +71,19 @@ def main() -> int:
         build_citegraph(conn)
         after = fingerprint(conn)
     ok = True
+    lines = []
     for t in TABLES:
         same = before[t] == after[t]
         ok &= same
-        print(f"{t:20s} rows {before[t][0]:>7,} -> {after[t][0]:>7,}  {'unchanged' if same else 'CHANGED'}")
-    print("IDEMPOTENT" if ok else "NOT IDEMPOTENT")
+        lines.append(
+            f"{t:20s} rows {before[t][0]:>7,} -> {after[t][0]:>7,}  {'unchanged' if same else 'CHANGED'}"
+        )
+    lines.append("IDEMPOTENT" if ok else "NOT IDEMPOTENT")
+    print("\n".join(lines))
+    stamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    RESULT.write_text(
+        f"# scripts/check_idempotency.py, {stamp}\n" + "\n".join(lines) + "\n", encoding="utf-8"
+    )
     return 0 if ok else 1
 
 
