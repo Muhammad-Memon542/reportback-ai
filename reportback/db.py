@@ -72,3 +72,57 @@ def table_counts(conn: Conn, tables: list[str]) -> dict[str, int]:
         row = conn.execute(f"SELECT count(*) FROM {t}").fetchone()  # noqa: S608 (t validated above)
         out[t] = int(row[0]) if row else 0
     return out
+
+
+def _pg_tool(name: str) -> str:
+    """Find a Postgres client binary (PATH first, then the Debian/Ubuntu versioned dir)."""
+    import shutil
+
+    found = shutil.which(name)
+    if found:
+        return found
+    for candidate in sorted(Path("/usr/lib/postgresql").glob(f"*/bin/{name}"), reverse=True):
+        return str(candidate)
+    raise FileNotFoundError(f"{name} not found; install the PostgreSQL client tools")
+
+
+def dump(settings: Settings, out: Path) -> Path:
+    """pg_dump in custom format, without owners/privileges so it restores into any database."""
+    import subprocess
+
+    if not settings.database_url:
+        raise DatabaseNotConfiguredError("DATABASE_URL is not set")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(  # noqa: S603 (fixed binary, list args)
+        [_pg_tool("pg_dump"), "--format=custom", "--compress=9", "--no-owner", "--no-privileges",
+         f"--dbname={settings.database_url}", f"--file={out}"],
+        check=True,
+    )  # fmt: skip
+    return out
+
+
+def restore(settings: Settings, src: Path) -> None:
+    """Restore a dump made by `dump` into DATABASE_URL, replacing the tables it contains.
+
+    Extensions are left out of the restore (a non-superuser can neither drop nor create
+    them): the target database must already have `vector` and `pg_trgm`."""
+    import subprocess
+    import tempfile
+
+    if not settings.database_url:
+        raise DatabaseNotConfiguredError("DATABASE_URL is not set")
+    toc = subprocess.run(  # noqa: S603
+        [_pg_tool("pg_restore"), "--list", str(src)], check=True, capture_output=True, text=True
+    ).stdout
+    keep = [line for line in toc.splitlines() if " EXTENSION " not in line]
+    with tempfile.NamedTemporaryFile("w", suffix=".list", delete=False) as f:
+        f.write("\n".join(keep) + "\n")
+        listing = f.name
+    try:
+        subprocess.run(  # noqa: S603
+            [_pg_tool("pg_restore"), "--clean", "--if-exists", "--no-owner", "--no-privileges",
+             "--exit-on-error", f"--use-list={listing}", f"--dbname={settings.database_url}", str(src)],
+            check=True,
+        )  # fmt: skip
+    finally:
+        Path(listing).unlink(missing_ok=True)

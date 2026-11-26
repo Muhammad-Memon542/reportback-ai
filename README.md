@@ -23,7 +23,14 @@ uv run pre-commit install
 uv run pytest -q && uv run ruff check . && uv run mypy
 ```
 
-You need Postgres 16 with `pgvector` and `pg_trgm` (CI uses the `pgvector/pgvector:pg16` image):
+You need Postgres 16 with `pgvector` and `pg_trgm` (CI uses the `pgvector/pgvector:pg16` image). The fastest start is to restore the published data snapshot (see [Releases](../../releases)):
+
+```bash
+uv run reportback db migrate
+uv run python scripts/db_release.py fetch   # newest data-YYYY-MM-DD release, sha256-verified
+```
+
+Or rebuild everything from the sources (about 3 hours at the polite crawl rate):
 
 ```bash
 uv run reportback db migrate

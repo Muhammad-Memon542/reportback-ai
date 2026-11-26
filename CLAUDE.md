@@ -23,7 +23,8 @@ ReportBack links Toronto City Council's report-back directives (from the City Cl
 - Checks: `uv run pytest -q && uv run ruff check . && uv run ruff format --check . && uv run mypy` (set `TEST_DATABASE_URL` to also run the Postgres tests)
 - `uv run python scripts/smoke_llm.py` · `uv run python scripts/smoke_ckan.py`
 - `uv run reportback serve` (local API, `GET /healthz`)
-- `uv run reportback db migrate`
+- `uv run reportback db migrate` · `uv run reportback db dump|restore [file]`
+- `uv run python scripts/db_release.py publish` (DB dump → `db-snapshot` branch → GitHub Release) · `uv run python scripts/db_release.py fetch` (download, verify, restore)
 - `uv run reportback snapshot` (archive new Report Request Log versions into `data/snapshots/`; also runs daily in GitHub Actions)
 - Ingest order: `uv run reportback ingest log` → `ingest votes` → `ingest tmmis` → `ingest background` → `ingest citegraph` → repeat `ingest tmmis` (next hop) / `background` / `citegraph`
 - `uv run reportback coverage` (writes `docs/COVERAGE.md`)

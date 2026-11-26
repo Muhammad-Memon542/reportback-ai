@@ -1,0 +1,33 @@
+name: Publish database release
+
+# Turns the `db-snapshot` branch (pushed by `scripts/db_release.py publish`) into a GitHub
+# Release with the dump attached. Runs with the repository's own token because releases
+# cannot be created from a Claude Code session (DECISIONS D21).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: db-snapshot
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=$(python3 -c "import json; print(json.load(open('MANIFEST.json'))['tag'])")
+          FILE=$(python3 -c "import json; print(json.load(open('MANIFEST.json'))['file'])")
+          sha256sum -c <<< "$(python3 -c "import json; m=json.load(open('MANIFEST.json')); print(m['sha256'] + '  ' + m['file'])")"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$FILE" --clobber
+            gh release edit "$TAG" --notes-file NOTES.md
+          else
+            gh release create "$TAG" "$FILE" --title "Data snapshot ${TAG#data-}" --notes-file NOTES.md --target main
+          fi

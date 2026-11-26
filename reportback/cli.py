@@ -23,12 +23,20 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_db_migrate(settings: Settings) -> int:
-    from reportback.db import connect, migrate
+def cmd_db(settings: Settings, args: argparse.Namespace) -> int:
+    from pathlib import Path
 
-    with connect(settings) as conn:
-        applied = migrate(conn)
-    print("applied:", applied or "nothing (up to date)")
+    from reportback import db
+
+    if args.action == "migrate":
+        with db.connect(settings) as conn:
+            applied = db.migrate(conn)
+        print("applied:", applied or "nothing (up to date)")
+    elif args.action == "dump":
+        print("wrote", db.dump(settings, Path(args.file)))
+    elif args.action == "restore":
+        db.restore(settings, Path(args.file))
+        print("restored", args.file)
     return 0
 
 
@@ -121,7 +129,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     serve.add_argument("--port", type=int, default=8000)
 
     db = sub.add_parser("db", help="database maintenance")
-    db.add_argument("action", choices=["migrate"])
+    db.add_argument("action", choices=["migrate", "dump", "restore"])
+    db.add_argument("file", nargs="?", default="data/releases/reportback.pgdump", help="dump/restore file")
 
     sub.add_parser("snapshot", help="archive new versions of the Report Request Log")
 
@@ -149,7 +158,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_serve(args)
     settings = get_settings()
     if args.command == "db":
-        return cmd_db_migrate(settings)
+        return cmd_db(settings, args)
     if args.command == "snapshot":
         return cmd_snapshot(settings)
     if args.command == "ingest":

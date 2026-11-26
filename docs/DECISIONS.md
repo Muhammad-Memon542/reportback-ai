@@ -87,3 +87,11 @@ The log sometimes repeats a directive: one row per closing item, or the same dir
 **D19. DB connections are autocommit.** Each `with conn.transaction():` is then a real transaction (see LESSONS L9), so the crawler commits item by item and an interruption loses nothing.
 
 **D20. PyMuPDF is AGPL-3.0.** The plan names it, and it's the most reliable extractor for these PDFs (fonts and bold flags drive the heading detection). Using it means the deployed service's source must be available under AGPL terms. That's compatible with a public repository, but the project licence you choose must allow it. If that's a problem: pdfplumber (MIT) is the fallback, at the cost of slower parsing.
+
+**D21. The loaded database is published as a GitHub Release asset.** (2026-11-26, requested by the project owner)
+The database (crawl + parse ≈ 3 h) otherwise lives only in an ephemeral container.
+- **Publishing:** `scripts/db_release.py publish` makes a `pg_dump` (custom format, no owners or privileges; ≈ 26 MB), force-pushes it with `MANIFEST.json` (sha256, row counts, migrations, commit) and `NOTES.md` to the `db-snapshot` branch, and dispatches `publish-db-release.yml`. That workflow creates release `data-YYYY-MM-DD` with the repository's own token, because releases can't be created from a Claude Code session.
+- **Storage:** the branch holds only the latest dump (force-pushed), so `main` never grows. Releases keep the history.
+- **Restoring:** `fetch` downloads the newest data release, verifies the sha256 and restores. It falls back to the branch if no release exists. The restore skips extensions, so the target database must already have `vector` and `pg_trgm` (a non-superuser can't drop or create them).
+- **Public:** the repository is public, so the dump is too. It holds only City open data (Open Government Licence – Toronto, attribution in the release notes). Public letters and deputations were never stored, and emails and phones are scrubbed.
+- **Not included:** the 3.2 GB raw cache (HTML pages, PDFs). It isn't needed to use the data, and the raw TMMIS pages contain the public's letters and names, which we don't redistribute.

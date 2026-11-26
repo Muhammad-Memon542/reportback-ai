@@ -55,3 +55,5 @@ Fixes: item and meeting numbers must be ≥ 1; month-year hints; short forms can
 **L16. Some PDF text layers contain NUL bytes**, and Postgres `text` rejects them (`backgroundfile-230424`). `scrub_pii` and `norm_ws` now drop `\x00`.
 
 **L17. Two writers of one column made the result depend on run order.** `doc.report_date` comes from the TMMIS listing ("(February 9, 2023) Report from …") or, failing that, from the PDF's `Date:` header. Re-parsing TMMIS pages overwrote the PDF-derived date with NULL, which a later PDF re-parse restored, and `scripts/check_idempotency.py` caught it. The TMMIS upsert now keeps an existing date when the listing has none.
+
+**L18. `pg_restore --clean` as a non-superuser fails on extensions** ("must be owner of extension vector"). Fixed by restoring from a filtered table of contents (`pg_restore --list`, dropping the EXTENSION entries, then `--use-list`). **Releases can't be created from a Claude Code session** (HTTP 403 on POST /releases), but workflow dispatch is allowed, so a workflow running with the repository's token creates them.
