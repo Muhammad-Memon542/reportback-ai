@@ -1,0 +1,22 @@
+{
+  "tag": "data-2026-11-26",
+  "file": "reportback-db-2026-11-26.pgdump",
+  "sha256": "16f141c010e38abcbd5825180861975912cb08b6fbacdaf5ac9d059de713262f",
+  "bytes": 26529766,
+  "commit": "f501075",
+  "made": "2026-11-26",
+  "counts": {
+    "log_snapshot": 3,
+    "directive": 4395,
+    "log_entry": 6413,
+    "vote": 46815,
+    "item": 2943,
+    "item_consideration": 4151,
+    "doc": 7553,
+    "doc_section": 23657,
+    "cites": 7998
+  },
+  "migrations": [
+    "001_init.sql"
+  ]
+}
