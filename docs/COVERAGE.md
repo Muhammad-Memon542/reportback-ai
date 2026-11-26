@@ -1,6 +1,6 @@
 # Coverage report
 
-Generated 2026-11-25 04:30 UTC by `uv run reportback coverage` from the local database. Re-running every ingest command produces the same counts (idempotent loads; see tests).
+Generated 2026-11-26 20:50 UTC by `uv run reportback coverage` from the local database. Re-running every ingest command produces the same counts (idempotent loads; see tests).
 
 Contains information licensed under the Open Government Licence – Toronto.
 
@@ -10,13 +10,14 @@ Contains information licensed under the Open Government Licence – Toronto.
 |---|---|---|---|
 | 2018-2022 | 2024-01-09 | 2,455 | 2018-2022/2024-01-09_f72a1677b79c.xlsx |
 | 2022-2026 | 2026-11-13 | 1,979 | 2022-2026/2026-11-13_ab1de968f2c1.xlsx |
+| 2022-2026 | 2026-11-25 | 1,979 | 2022-2026/2026-11-25_f902b4b4d655.xlsx |
 
-4,434 log rows → **4,395 directives** (rows describing the same item + text are merged; every row is kept in `log_entry`).
+6,413 log rows → **4,395 directives** (rows describing the same item + text are merged; every row is kept in `log_entry`).
 
 | term | directives | closed | ncf | mixed | unknown | with closing item | with ≥1 division | with due date |
 |---|---|---|---|---|---|---|---|---|
 | 2018-2022 | 2,444 | 1,173 | 1,270 | 0 | 1 | 1,135 | 2,435 | 1,635 |
-| 2022-2026 | 1,951 | 693 | 1,245 | 13 | 0 | 727 | 1,935 | 1,291 |
+| 2022-2026 | 1,951 | 695 | 1,243 | 13 | 0 | 729 | 1,935 | 1,291 |
 
 **How `due_date` was derived** (`due_rule`; NULL due dates are never treated as overdue):
 
@@ -55,7 +56,7 @@ Not every Council vote is recorded electronically; a missing vote row is not evi
 
 | fetch status | items |
 |---|---|
-| ok | 2,898 |
+| ok | 2,911 |
 | not_found | 32 |
 
 2022–2026 seeds and how many were fetched:
@@ -63,54 +64,54 @@ Not every Council vote is recorded electronically; a missing vote row is not evi
 | seed source | distinct IDs | fetched ok |
 |---|---|---|
 | directive items | 1,295 | 1,288 |
-| closing items (ground truth) | 496 | 493 |
+| closing items (ground truth) | 498 | 495 |
 | voted items | 1,110 | 1,110 |
 
 |  | count |
 |---|---|
-| considerations (committee/Council cards) | 4,134 |
-| items with a decision text | 2,890 |
-| public communications (counted, not stored) | 5,110 |
-| speakers/deputants (counted, not stored) | 4,392 |
+| considerations (committee/Council cards) | 4,151 |
+| items with a decision text | 2,903 |
+| public communications (counted, not stored) | 5,112 |
+| speakers/deputants (counted, not stored) | 4,399 |
 
 ## 4. Background files
 
 | kind | listed | downloaded ok | skipped | errors | not found | pages |
 |---|---|---|---|---|---|---|
-| attachment | 2,481 | 0 | 0 | 0 | 0 | 0 |
-| report | 2,124 | 2,124 | 0 | 0 | 0 | 30,672 |
+| attachment | 2,488 | 0 | 0 | 0 | 0 | 0 |
+| report | 2,134 | 2,134 | 0 | 0 | 0 | 30,788 |
 | budget | 701 | 0 | 0 | 0 | 0 | 0 |
-| letter | 521 | 520 | 0 | 0 | 1 | 874 |
-| motion | 481 | 0 | 0 | 0 | 0 | 0 |
+| letter | 524 | 523 | 0 | 0 | 1 | 879 |
+| motion | 482 | 0 | 0 | 0 | 0 | 0 |
 | notice | 383 | 0 | 0 | 0 | 0 | 0 |
-| presentation | 343 | 0 | 0 | 0 | 0 | 0 |
+| presentation | 345 | 0 | 0 | 0 | 0 | 0 |
 | other | 271 | 0 | 0 | 0 | 0 | 0 |
 | briefing_note | 157 | 157 | 0 | 0 | 0 | 1,471 |
 | financial_impact | 47 | 0 | 0 | 0 | 0 | 0 |
 | answer | 17 | 17 | 0 | 0 | 0 | 61 |
 | mayoral_direction | 4 | 0 | 0 | 0 | 0 | 0 |
 
-23,561 sections extracted. Most common section headings:
+23,657 sections extracted. Most common section headings:
 
 | section | count |
 |---|---|
-| CONTACT | 2,309 |
-| PREAMBLE | 2,200 |
-| RECOMMENDATIONS | 2,157 |
-| SUMMARY | 2,128 |
-| SIGNATURE | 2,088 |
-| FINANCIAL IMPACT | 2,067 |
-| COMMENTS | 2,042 |
-| DECISION HISTORY | 1,976 |
-| ATTACHMENTS | 1,649 |
-| BODY | 471 |
-| REASON FOR CONFIDENTIAL INFORMATION | 290 |
-| CONFIDENTIAL ATTACHMENT | 281 |
+| CONTACT | 2,318 |
+| PREAMBLE | 2,210 |
+| RECOMMENDATIONS | 2,166 |
+| SUMMARY | 2,137 |
+| SIGNATURE | 2,097 |
+| FINANCIAL IMPACT | 2,076 |
+| COMMENTS | 2,051 |
+| DECISION HISTORY | 1,985 |
+| ATTACHMENTS | 1,656 |
+| BODY | 473 |
+| REASON FOR CONFIDENTIAL INFORMATION | 291 |
+| CONFIDENTIAL ATTACHMENT | 282 |
 | THE APPLICATION | 225 |
-| CONCLUSION | 189 |
+| CONCLUSION | 191 |
 | APPLICATION BACKGROUND | 170 |
 
-Staff reports with a DECISION HISTORY section: 1,976 of 2,124 downloaded reports (93.0%).
+Staff reports with a DECISION HISTORY section: 1,985 of 2,134 downloaded reports (93.0%).
 
 ## 5. Citation graph
 
@@ -118,14 +119,14 @@ Staff reports with a DECISION HISTORY section: 1,976 of 2,124 downloaded reports
 |---|---|---|
 | directive | full | 77 |
 | directive | short_inferred | 12 |
-| doc | full | 4,444 |
+| doc | full | 4,464 |
 | doc | full_footnote_repaired | 6 |
-| doc | short_inferred | 3,009 |
+| doc | short_inferred | 3,046 |
 | doc | short_inferred_footnote_repaired | 5 |
-| item | full | 212 |
+| item | full | 213 |
 | item | short_inferred | 175 |
 
-Distinct cited items: 3,112. Precision on 100 hand-checked matches: see section 7.
+Distinct cited items: 3,123. Precision on 100 hand-checked matches: see section 7.
 
 ## 6. Preview: does the closing item cite the directive's item?
 
@@ -133,7 +134,7 @@ For closed 2022–2026 directives, each (directive item → closing item) pair f
 
 | ground-truth pairs | closing item fetched | closing item (or its reports) cites the directive's item |
 |---|---|---|
-| 745 | 735 | 696 (94.7%) |
+| 747 | 737 | 698 (94.7%) |
 
 ## 7. Phase 1 acceptance checks
 
