@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     # to cap cost; leave unset for non-reasoning models (they reject the parameter).
     llm_reasoning_effort: ReasoningEffort | None = None
     embedding_dim: int = 1536  # must match vector(N) columns in the schema
+    embedding_price_per_m_tokens: float = 0.02  # USD; text-embedding-3-small list price, for cost guards
+    embed_max_cost_usd: float = 2.0  # refuse an indexing run whose estimate exceeds this
     llm_timeout_s: float = 60.0
     llm_max_retries: int = 2
 

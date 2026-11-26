@@ -52,7 +52,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106", "DTZ001"]  # asserts, fake keys, naive Excel-style datetimes
+"tests/**" = ["S101", "S105", "S106", "S311", "DTZ001"]  # asserts, fake keys, seeded random, naive datetimes
 "scripts/**" = ["T201", "S608", "S603", "S607"]  # scripts print, build SQL from fixed names, run git/gh
 "evals/**" = ["T201", "S311"]          # eval scripts print; seeded sampling is not crypto
 "reportback/cli.py" = ["T201"]         # the CLI prints by design

@@ -109,6 +109,27 @@ def cmd_ingest(settings: Settings, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_index(settings: Settings, args: argparse.Namespace) -> int:
+    from reportback.db import connect
+    from reportback.index.chunk_embed import embed_missing, write_chunks
+
+    with connect(settings) as conn:
+        if not args.embed_only:
+            _print({"chunking": write_chunks(conn, settings)})
+        if not args.chunks_only:
+            from reportback.llm import LLMClient
+
+            max_cost = args.max_cost if args.max_cost is not None else settings.embed_max_cost_usd
+            _print(
+                {
+                    "embedding": embed_missing(
+                        conn, settings, LLMClient(settings), max_cost_usd=max_cost, limit=args.limit
+                    )
+                }
+            )
+    return 0
+
+
 def cmd_coverage(settings: Settings, args: argparse.Namespace) -> int:
     from reportback.coverage import write_coverage_report
     from reportback.db import connect
@@ -150,6 +171,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="background: doc kinds to download (comma-separated)",
     )
 
+    idx = sub.add_parser("index", help="build retrieval chunks and embed them")
+    idx.add_argument("--chunks-only", action="store_true")
+    idx.add_argument("--embed-only", action="store_true")
+    idx.add_argument("--max-cost", type=float, default=None, help="USD cap for this embedding run")
+    idx.add_argument("--limit", type=int, default=None, help="embed at most N new texts")
+    idx.add_argument(
+        "--tpm", type=int, default=180_000, help="pace embedding at this many estimated tokens/minute"
+    )
+
     cov = sub.add_parser("coverage", help="write the coverage report")
     cov.add_argument("--out", default="docs/COVERAGE.md")
 
@@ -163,6 +193,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_snapshot(settings)
     if args.command == "ingest":
         return cmd_ingest(settings, args)
+    if args.command == "index":
+        return cmd_index(settings, args)
     if args.command == "coverage":
         return cmd_coverage(settings, args)
     parser.error(f"unknown command {args.command}")

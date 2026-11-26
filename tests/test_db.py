@@ -6,6 +6,7 @@ from reportback.db import Conn, migrate, migration_files, table_counts
 def test_migration_files_are_numbered_and_unique() -> None:
     files = migration_files()
     assert files and files[0].name == "001_init.sql"
+    assert [f.name[:3] for f in files] == [f"{i:03d}" for i in range(1, len(files) + 1)]  # no gaps
 
 
 def test_migrate_is_idempotent(db: Conn) -> None:
